@@ -12,10 +12,34 @@ import android.widget.TextView;
 
 public class FloatWindowSmallView extends LinearLayout {
 
-	public static int sViewWidth;
-	public static int sViewHeight;
-	private static int sStatusBarHeight;
-	private WindowManager sWindowManager;
+	private static FloatWindowSmallView instanceFloatWindowSmallView = null;
+	public static FloatWindowSmallView getInstance(Context context)
+	{
+		if(instanceFloatWindowSmallView == null){
+			synchronized (FloatWindowSmallView.class) {
+				if(instanceFloatWindowSmallView == null){
+					instanceFloatWindowSmallView = new FloatWindowSmallView(context);
+				}
+			}
+		}
+		return instanceFloatWindowSmallView;
+	}
+	private int mViewWidth;
+	public int getmViewWidth() {
+		return mViewWidth;
+	}
+	public void setmViewWidth(int mViewWidth) {
+		this.mViewWidth = mViewWidth;
+	}
+	private int mViewHeight;
+	public int getmViewHeight() {
+		return mViewHeight;
+	}
+	public void setmViewHeight(int mViewHeight) {
+		this.mViewHeight = mViewHeight;
+	}
+	private int mStatusBarHeight;
+	private WindowManager mWindowManager;
 	private WindowManager.LayoutParams mLayoutParams;
 	private float mMoveXInScreen;
 	private float mMoveYInScreen;
@@ -23,16 +47,16 @@ public class FloatWindowSmallView extends LinearLayout {
 	private float mDownYInScreen;
 	private float mDownXInView;
 	private float mDownYInView;
-	public FloatWindowSmallView(Context context) {
+	private FloatWindowSmallView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
-		sWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+		mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 		LayoutInflater.from(context).inflate(R.layout.float_window_small, this);
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.small_window_layout);
-		sViewWidth = linearLayout.getLayoutParams().width;
-		sViewHeight = linearLayout.getLayoutParams().height;
+		mViewWidth = linearLayout.getLayoutParams().width;
+		mViewHeight = linearLayout.getLayoutParams().height;
 		TextView textView = (TextView)findViewById(R.id.textview_percent);
-		textView.setText(FloatWindowManager.getUsedPercentValue(context));
+		textView.setText(FloatWindowManager.getInstance().getUsedPercentValue(context));
 	}
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -70,30 +94,30 @@ public class FloatWindowSmallView extends LinearLayout {
 	{
 		mLayoutParams.x = (int)(mMoveXInScreen - mDownXInView);
 		mLayoutParams.y = (int)(mMoveYInScreen - mDownYInView);
-		sWindowManager.updateViewLayout(this, mLayoutParams);
+		mWindowManager.updateViewLayout(this, mLayoutParams);
 	}
 	
 	private void showLargeFloatWindow()
 	{
-		FloatWindowManager.createLargeFloatWindow(getContext());
-		FloatWindowManager.removeSmallFloatWindow(getContext());
+		FloatWindowManager.getInstance().createLargeFloatWindow(getContext());
+		FloatWindowManager.getInstance().removeSmallFloatWindow(getContext());
 	}
 	
 	private int getStatusBarHeight()
 	{
-		if(sStatusBarHeight == 0){
+		if(mStatusBarHeight == 0){
 			try {
 				Class<?> class1 = Class.forName("com.android.internal.R$dimen");
 				Object object = class1.newInstance();
 				Field field = class1.getField("status_bar_height");
 				int x = (Integer)field.get(object);
-				sStatusBarHeight = getResources().getDimensionPixelSize(x);
+				mStatusBarHeight = getResources().getDimensionPixelSize(x);
 			} catch (Exception e) {
 				// TODO: handle exception
 				e.printStackTrace();
 			}
 		}
-		return sStatusBarHeight;
+		return mStatusBarHeight;
 	}
 	
 	

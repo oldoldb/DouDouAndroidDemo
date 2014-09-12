@@ -14,107 +14,122 @@ import android.widget.TextView;
 
 public class FloatWindowManager {
 	
-	private static FloatWindowSmallView sFloatWindowSmallView;
-	private static FloatWindowLargeView sFloatWindowLargeView;
-	private static WindowManager.LayoutParams sSmalLayoutParams;
-	private static WindowManager.LayoutParams sLargeLayoutParams;
-	private static WindowManager sWindowManager;
-	private static ActivityManager sActivityManager;
-	
-	
-	private static WindowManager getWindowManager(Context context)
+	private static FloatWindowManager instanceFloatWindowManager = null;
+	public static FloatWindowManager getInstance()
 	{
-		if(sWindowManager == null){
-			sWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+		if(instanceFloatWindowManager == null){
+			synchronized (FloatWindowManager.class) {
+				if(instanceFloatWindowManager == null){
+					instanceFloatWindowManager = new FloatWindowManager();
+				}
+			}
 		}
-		return sWindowManager;
+		return instanceFloatWindowManager;
 	}
-	private static ActivityManager getActivityManager(Context context)
+	private FloatWindowSmallView mFloatWindowSmallView;
+	private FloatWindowLargeView mFloatWindowLargeView;
+	private WindowManager.LayoutParams mSmalLayoutParams;
+	private WindowManager.LayoutParams mLargeLayoutParams;
+	private WindowManager mWindowManager;
+	private ActivityManager mActivityManager;
+	
+	private FloatWindowManager()
 	{
-		if(sActivityManager == null){
-			sActivityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
-		}
-		return sActivityManager;
+		
 	}
-	public static void createSmallFloatWindow(Context context)
+	public WindowManager getWindowManager(Context context)
+	{
+		if(mWindowManager == null){
+			mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+		}
+		return mWindowManager;
+	}
+	public ActivityManager getActivityManager(Context context)
+	{
+		if(mActivityManager == null){
+			mActivityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+		}
+		return mActivityManager;
+	}
+	public void createSmallFloatWindow(Context context)
 	{
 		WindowManager windowManager = getWindowManager(context);
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(displayMetrics);
 		int screenWidth = displayMetrics.widthPixels;
 		int screenHeight = displayMetrics.heightPixels;
-		if(sFloatWindowSmallView == null){
-			sFloatWindowSmallView = new FloatWindowSmallView(context);
-			if(sSmalLayoutParams == null){
-				sSmalLayoutParams = new WindowManager.LayoutParams();
-				sSmalLayoutParams.type = android.view.WindowManager.LayoutParams.TYPE_PHONE;
-				sSmalLayoutParams.format = PixelFormat.RGBA_8888;
-				sSmalLayoutParams.flags = android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-				sSmalLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-				sSmalLayoutParams.width = FloatWindowSmallView.sViewWidth;
-				sSmalLayoutParams.height = FloatWindowSmallView.sViewHeight;
-				sSmalLayoutParams.x = screenWidth;
-				sSmalLayoutParams.y = screenHeight / 2;
+		if(mFloatWindowSmallView == null){
+			mFloatWindowSmallView = FloatWindowSmallView.getInstance(context);
+			if(mSmalLayoutParams == null){
+				mSmalLayoutParams = new WindowManager.LayoutParams();
+				mSmalLayoutParams.type = android.view.WindowManager.LayoutParams.TYPE_PHONE;
+				mSmalLayoutParams.format = PixelFormat.RGBA_8888;
+				mSmalLayoutParams.flags = android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+				mSmalLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+				mSmalLayoutParams.width = mFloatWindowSmallView.getmViewWidth();
+				mSmalLayoutParams.height = mFloatWindowSmallView.getmViewHeight();
+				mSmalLayoutParams.x = screenWidth;
+				mSmalLayoutParams.y = screenHeight / 2;
 			}
-			sFloatWindowSmallView.setParams(sSmalLayoutParams);
-			windowManager.addView(sFloatWindowSmallView, sSmalLayoutParams);
+			mFloatWindowSmallView.setParams(mSmalLayoutParams);
+			windowManager.addView(mFloatWindowSmallView, mSmalLayoutParams);
 		}
 	}
 	
-	public static void removeSmallFloatWindow(Context context)
+	public void removeSmallFloatWindow(Context context)
 	{
-		if(sFloatWindowSmallView != null){
+		if(mFloatWindowSmallView != null){
 			WindowManager windowManager = getWindowManager(context);
-			windowManager.removeView(sFloatWindowSmallView);
-			sFloatWindowSmallView = null;
+			windowManager.removeView(mFloatWindowSmallView);
+			mFloatWindowSmallView = null;
 		}
 	}
 	
-	public static void createLargeFloatWindow(Context context)
+	public void createLargeFloatWindow(Context context)
 	{
 		WindowManager windowManager = getWindowManager(context);
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(displayMetrics);
 		int screenWidth = displayMetrics.widthPixels;
 		int screenHeight = displayMetrics.heightPixels;
-		if(sFloatWindowLargeView == null){
-			sFloatWindowLargeView = new FloatWindowLargeView(context);
-			if(sLargeLayoutParams == null){
-				sLargeLayoutParams = new WindowManager.LayoutParams();
-				sLargeLayoutParams.x = screenWidth / 2 - FloatWindowLargeView.sViewWidth / 2;
-				sLargeLayoutParams.y = screenHeight / 2 - FloatWindowLargeView.sViewHeight / 2;
-				sLargeLayoutParams.type = android.view.WindowManager.LayoutParams.TYPE_PHONE;
-				sLargeLayoutParams.format = PixelFormat.RGBA_8888;
-				sLargeLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-				sLargeLayoutParams.width = FloatWindowLargeView.sViewWidth;
-				sLargeLayoutParams.height = FloatWindowLargeView.sViewHeight;
+		if(mFloatWindowLargeView == null){
+			mFloatWindowLargeView = FloatWindowLargeView.getInstance(context);
+			if(mLargeLayoutParams == null){
+				mLargeLayoutParams = new WindowManager.LayoutParams();
+				mLargeLayoutParams.x = screenWidth / 2 - mFloatWindowLargeView.getmViewWidth() / 2;
+				mLargeLayoutParams.y = screenHeight / 2 - mFloatWindowLargeView.getmViewHeight() / 2;
+				mLargeLayoutParams.type = android.view.WindowManager.LayoutParams.TYPE_PHONE;
+				mLargeLayoutParams.format = PixelFormat.RGBA_8888;
+				mLargeLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+				mLargeLayoutParams.width = mFloatWindowLargeView.getmViewWidth();
+				mLargeLayoutParams.height = mFloatWindowLargeView.getmViewHeight();
 			}
-			windowManager.addView(sFloatWindowLargeView, sLargeLayoutParams);
+			windowManager.addView(mFloatWindowLargeView, mLargeLayoutParams);
 		}
 	}
 	
-	public static void removeLargeFloatWindow(Context context)
+	public void removeLargeFloatWindow(Context context)
 	{
-		if(sFloatWindowLargeView != null){
+		if(mFloatWindowLargeView != null){
 			WindowManager windowManager = getWindowManager(context);
-			windowManager.removeView(sFloatWindowLargeView);
-			sFloatWindowLargeView = null;
+			windowManager.removeView(mFloatWindowLargeView);
+			mFloatWindowLargeView = null;
 		}
 	}
 	
-	public static boolean isFloatWindowShowing()
+	public boolean isFloatWindowShowing()
 	{
-		return sFloatWindowSmallView != null || sFloatWindowLargeView != null;
+		return mFloatWindowSmallView != null || mFloatWindowLargeView != null;
 	}
-	public static void updateUsedPercent(Context context)
+	public void updateUsedPercent(Context context)
 	{
-		if(sFloatWindowSmallView != null){
-			TextView textView = (TextView)sFloatWindowSmallView.findViewById(R.id.textview_percent);
+		if(mFloatWindowSmallView != null){
+			TextView textView = (TextView)mFloatWindowSmallView.findViewById(R.id.textview_percent);
 			textView.setText(getUsedPercentValue(context));
 		}
 	}
 	
-	public static String getUsedPercentValue(Context context)
+	public String getUsedPercentValue(Context context)
 	{
 		String dir = "/proc/meminfo";
 		try {
@@ -133,7 +148,7 @@ public class FloatWindowManager {
 		}
 		return "悬浮窗";
 	}
-	private static long getAvailableMemory(Context context)
+	private long getAvailableMemory(Context context)
 	{
 		ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
 		getActivityManager(context).getMemoryInfo(memoryInfo);

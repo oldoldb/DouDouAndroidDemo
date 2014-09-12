@@ -67,32 +67,32 @@ public class FloatWindowService extends Service {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			if(isShowDesktopHome() && !FloatWindowManager.isFloatWindowShowing()){
+			if(isShowDesktopHome() && !FloatWindowManager.getInstance().isFloatWindowShowing()){
 				mHandler.post(new Runnable() {
 					
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						FloatWindowManager.createSmallFloatWindow(getApplicationContext());
+						FloatWindowManager.getInstance().createSmallFloatWindow(getApplicationContext());
 					}
 				});
-			}else if(!isShowDesktopHome() && FloatWindowManager.isFloatWindowShowing()){
+			}else if(!isShowDesktopHome() && FloatWindowManager.getInstance().isFloatWindowShowing()){
 				mHandler.post(new Runnable() {
 					
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						FloatWindowManager.removeSmallFloatWindow(getApplicationContext());
-						FloatWindowManager.removeLargeFloatWindow(getApplicationContext());
+						FloatWindowManager.getInstance().removeSmallFloatWindow(getApplicationContext());
+						FloatWindowManager.getInstance().removeLargeFloatWindow(getApplicationContext());
 					}
 				});
-			}else if(isShowDesktopHome() && FloatWindowManager.isFloatWindowShowing()){
+			}else if(isShowDesktopHome() && FloatWindowManager.getInstance().isFloatWindowShowing()){
 				mHandler.post(new Runnable() {
 					
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						FloatWindowManager.updateUsedPercent(getApplicationContext());
+						FloatWindowManager.getInstance().updateUsedPercent(getApplicationContext());
 					}
 				});
 			}
