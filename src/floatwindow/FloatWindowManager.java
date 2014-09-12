@@ -3,13 +3,18 @@ package floatwindow;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
+
 import com.oldoldb.doudouandroiddemo.R;
+
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
 
 public class FloatWindowManager {
@@ -28,11 +33,12 @@ public class FloatWindowManager {
 	}
 	private FloatWindowSmallView mFloatWindowSmallView;
 	private FloatWindowLargeView mFloatWindowLargeView;
+	private RocketLauncher mRocketLauncher;
 	private WindowManager.LayoutParams mSmalLayoutParams;
 	private WindowManager.LayoutParams mLargeLayoutParams;
+	private WindowManager.LayoutParams mLauncherLayoutParams;
 	private WindowManager mWindowManager;
 	private ActivityManager mActivityManager;
-	
 	private FloatWindowManager()
 	{
 		
@@ -117,6 +123,53 @@ public class FloatWindowManager {
 		}
 	}
 	
+	public void createLauncher(Context context) {  
+        WindowManager windowManager = getWindowManager(context);  
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+		windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+		int screenWidth = displayMetrics.widthPixels;
+		int screenHeight = displayMetrics.heightPixels;
+        if (mRocketLauncher == null) {  
+        	mRocketLauncher = RocketLauncher.getInstance(context);
+            if (mLauncherLayoutParams == null) {  
+            	mLauncherLayoutParams = new WindowManager.LayoutParams();
+            	mLauncherLayoutParams.x = screenWidth / 2 - mRocketLauncher.getmWidth() / 2;  
+            	mLauncherLayoutParams.y = screenHeight - mRocketLauncher.getHeight();
+            	mLauncherLayoutParams.type = LayoutParams.TYPE_PHONE;  
+            	mLauncherLayoutParams.format = PixelFormat.RGBA_8888;  
+            	mLauncherLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;  
+            	mLauncherLayoutParams.width = mRocketLauncher.getmWidth();  
+            	mLauncherLayoutParams.height = mRocketLauncher.getmHeight();
+            }  
+            windowManager.addView(mRocketLauncher, mLauncherLayoutParams);  
+        }  
+    }  
+	
+    public void removeLauncher(Context context) {  
+        if (mRocketLauncher != null) {  
+            WindowManager windowManager = getWindowManager(context);  
+            windowManager.removeView(mRocketLauncher);  
+            mRocketLauncher = null;  
+        }  
+    }  
+  
+    public void updateLauncher() {  
+        if (mRocketLauncher != null) {  
+        	mRocketLauncher.updateLauncherStatus(isReadyToLaunch());  
+        }  
+    }
+    public boolean isReadyToLaunch() {  
+    	if(mLauncherLayoutParams == null){
+    		createLauncher(mFloatWindowSmallView.getContext());
+    	}
+        if ((mSmalLayoutParams.x > mLauncherLayoutParams.x && mSmalLayoutParams.x  
+                + mSmalLayoutParams.width < mLauncherLayoutParams.x  
+                + mLauncherLayoutParams.width)  
+                && (mSmalLayoutParams.y + mSmalLayoutParams.height > mLauncherLayoutParams.y)) {  
+            return true;  
+        }  
+        return false;  
+    }  
 	public boolean isFloatWindowShowing()
 	{
 		return mFloatWindowSmallView != null || mFloatWindowLargeView != null;
@@ -153,5 +206,14 @@ public class FloatWindowManager {
 		ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
 		getActivityManager(context).getMemoryInfo(memoryInfo);
 		return memoryInfo.availMem;
+	}
+	
+	public void killBackgroundProcess(Context context)
+	{
+		List<RunningTaskInfo> runningTaskInfos = mActivityManager.getRunningTasks(Integer.MAX_VALUE);
+		for(RunningTaskInfo runningTaskInfo : runningTaskInfos){
+			String packageName = runningTaskInfo.topActivity.getPackageName();
+			mActivityManager.killBackgroundProcesses(packageName);
+		}
 	}
 }
