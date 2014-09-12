@@ -4,5 +4,8 @@
     <string name="app_name">DouDouAndroidDemo</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-
+    
+    <string name="button_start_float_window_text">Start Float Window</string>
+    <string name="close_float_window_text">Close Float Window</string>
+	<string name="back_text">Back</string>
 </resources>
